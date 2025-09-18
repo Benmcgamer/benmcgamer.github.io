@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wheels and Trucks Shop</title>
+<style>
+    :root {
+      --orange: #ff6600;
+      --dark-gray: #333333;
+      --medium-gray: #555555;
+      --light-gray: #eeeeee;
+      --bg-gray: #f4f4f4;
+      --white: #ffffff;
+      --text-dark: #222222;
+      --text-light: #fafafa;
+      --border-gray: #cccccc;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: var(--bg-gray);
+      color: var(--text-dark);
+      display: grid;
+      grid-template-areas:
+        "header header header"
+        "main main sidebar"
+        "footer footer footer";
+      grid-template-columns: 2fr 2fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+    }
+
+    header {
+      grid-area: header;
+      background-color: var(--dark-gray);
+      color: var(--white);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 4px solid var(--orange);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--orange);
+    }
+
+    header .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--white);
+    }
+
+    main {
+      grid-area: main;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .car-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .car-card {
+      background-color: var(--white);
+      border: 2px solid var(--orange);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .car-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .car-card .info {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .car-card .info .name {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--dark-gray);
+    }
+
+    .car-card .info .brand, .car-card .info .price {
+      font-size: 14px;
+      color: var(--medium-gray);
+    }
+
+    .car-card .buttons {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      border-top: 1px solid var(--border-gray);
+    }
+
+    .car-card button {
+      background-color: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .car-card button:hover {
+      background-color: #e65500;
+    }
+
+    aside.sidebar {
+      grid-area: sidebar;
+      background-color: var(--dark-gray);
+      color: var(--text-light);
+      padding: 20px;
+      border-left: 4px solid var(--orange);
+      overflow-y: auto;
+    }
+
+    aside.sidebar h2 {
+      margin-top: 0;
+      color: var(--orange);
+    }
+
+    aside .filter-group {
+      margin-bottom: 20px;
+    }
+
+    aside input[type="text"], aside input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #aaa;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+
+    aside button {
+      background-color: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    aside button:hover {
+      background-color: #e65500;
+    }
+
+    #admin-section {
+      margin-top: 30px;
+      border-top: 1px solid #777;
+      padding-top: 20px;
+    }
+
+    #add-edit-car-form {
+      display: none;
+      margin-top: 10px;
+      background-color: var(--white);
+      padding: 10px;
+      color: var(--text-dark);
+      border-radius: 4px;
+    }
+
+    #add-edit-car-form input, #add-edit-car-form label {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #login-error, #form-success, #form-error {
+      font-size: 14px;
+    }
+
+    footer {
+      grid-area: footer;
+      background-color: var(--medium-gray);
+      color: var(--white);
+      text-align: center;
+      padding: 10px;
+    }
+  
+.filter-group label {
+  display: block;
+  margin: 6px 0 2px;
+  font-weight: bold;
+}
+
+.filter-group input[type="checkbox"] {
+  margin-right: 6px;
+  margin-top: 4px;
+}
+
+#results-counter {
+  margin: 10px 0;
+  padding: 6px;
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+  font-weight: bold;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid var(--border-gray);
+}
+
+.sort-option {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+}
+
+header img.logo-img {
+  height: 60px;
+  width: auto;
+}
+
+.img-missing { opacity: 0.7; filter: grayscale(100%); }
+</style>
+</head>
+<body>
+<header>
+<h1>Wheels and Trucks</h1>
+<img alt="Logo" class="logo-img" src="img/wheels.webp"/></header>
+<main>
+<div class="car-grid" id="car-grid">
+<!-- Auto-Karten -->
+</div>
+</main>
+<aside class="sidebar">
+<h2>Suche &amp; Filter</h2>
+<div class="filter-group">
+<label for="search-name">Name</label>
+<input id="search-name" oninput="applyFilters()" placeholder="z. B. Modell" type="text"/>
+</div>
+<div class="filter-group">
+<label for="filter-brand">Marke</label>
+<input id="filter-brand" oninput="applyFilters()" placeholder="z. B. Audi" type="text"/>
+</div>
+<div class="filter-group">
+<label for="filter-price-min">Preis ab</label>
+<input id="filter-price-min" oninput="applyFilters()" placeholder="Min" type="number"/>
+</div>
+<div class="filter-group">
+<label for="filter-price-max">Preis bis</label>
+<input id="filter-price-max" oninput="applyFilters()" placeholder="Max" type="number"/>
+</div>
+<div id="results-counter">Gefundene Fahrzeuge: 0</div><div class="filter-group"><label>Sortieren nach:</label><div class="sort-option"><input id="sort-price-asc" onchange="applyFilters()" type="checkbox" value="price-asc"/><label for="sort-price-asc"> Preis aufsteigend</label></div><div class="sort-option"><input id="sort-price-desc" onchange="applyFilters()" type="checkbox" value="price-desc"/><label for="sort-price-desc"> Preis absteigend</label></div><div class="sort-option"><input id="sort-name-asc" onchange="applyFilters()" type="checkbox" value="name-asc"/><label for="sort-name-asc"> Name A–Z</label></div><div class="sort-option"><input id="sort-brand-asc" onchange="applyFilters()" type="checkbox" value="brand-asc"/><label for="sort-brand-asc"> Marke A–Z</label></div></div></aside>
+<footer>
+    © 2025 Wheels and Trucks
+  </footer>
+<script>let cars = [
+  {
+    "id": 1,
+    "name": "Zombie Bobber",
+    "brand": "Western",
+    "price": 33489,
+    "img": "img/Zombie Bobber.webp"
+  },
+  {
+    "id": 2,
+    "name": "Nightblade",
+    "brand": "Western",
+    "price": 30995,
+    "img": "img/Nightblade.webp"
+  },
+  {
+    "id": 3,
+    "name": "Zombie Chopper",
+    "brand": "Western",
+    "price": 30989,
+    "img": "img/Zombie Chopper.webp"
+  },
+  {
+    "id": 4,
+    "name": "Zombie V8",
+    "brand": "Western",
+    "price": 61500,
+    "img": "img/Zombie V8.webp"
+  },
+  {
+    "id": 5,
+    "name": "Stockholm",
+    "brand": "Western",
+    "price": 32500,
+    "img": "img/Stockholm.webp"
+  },
+  {
+    "id": 6,
+    "name": "Cliffhanger",
+    "brand": "Western",
+    "price": 31857,
+    "img": "img/Cliffhanger.webp"
+  },
+  {
+    "id": 7,
+    "name": "Starfighter",
+    "brand": "Western",
+    "price": 29800,
+    "img": "img/Starfighter.webp"
+  },
+  {
+    "id": 8,
+    "name": "Wolfsbane",
+    "brand": "Western",
+    "price": 16449,
+    "img": "img/Wolfsbane.webp"
+  },
+  {
+    "id": 9,
+    "name": "Gargoyle",
+    "brand": "Western",
+    "price": 27599,
+    "img": "img/Gargoyle.webp"
+  },
+  {
+    "id": 10,
+    "name": "Deamon",
+    "brand": "Western",
+    "price": 13989,
+    "img": "img/Deamon.webp"
+  },
+  {
+    "id": 11,
+    "name": "Deamon Custom",
+    "brand": "Western",
+    "price": 14149,
+    "img": "img/Deamon Custom.webp"
+  },
+  {
+    "id": 12,
+    "name": "Reever",
+    "brand": "Western",
+    "price": 128000,
+    "img": "img/Reever.webp"
+  },
+  {
+    "id": 13,
+    "name": "Bagger",
+    "brand": "Western",
+    "price": 20509,
+    "img": "img/Bagger.webp"
+  },
+  {
+    "id": 14,
+    "name": "Powerpurge",
+    "brand": "Western",
+    "price": 24990,
+    "img": "img/Powersurge.webp"
+  },
+  {
+    "id": 15,
+    "name": "Fixter",
+    "brand": "Bikes",
+    "price": 235,
+    "img": "img/Fixter.webp"
+  },
+  {
+    "id": 16,
+    "name": "Cruiser",
+    "brand": "Bikes",
+    "price": 210,
+    "img": "img/Cruiser.webp"
+  },
+  {
+    "id": 17,
+    "name": "Scorcher",
+    "brand": "Bikes",
+    "price": 250,
+    "img": "img/scorcher.webp"
+  },
+  {
+    "id": 18,
+    "name": "BMX",
+    "brand": "Bikes",
+    "price": 200,
+    "img": "img/BMX.webp"
+  },
+  {
+    "id": 19,
+    "name": "Tribike",
+    "brand": "Bikes",
+    "price": 280,
+    "img": "img/Tribike.webp"
+  },
+  {
+    "id": 20,
+    "name": "Caracara",
+    "brand": "Vapid",
+    "price": 81850,
+    "img": "img/Caracara.webp"
+  },
+  {
+    "id": 21,
+    "name": "Guardian",
+    "brand": "Vapid",
+    "price": 44645,
+    "img": "img/Guardian.webp"
+  },
+  {
+    "id": 22,
+    "name": "Youga Classic",
+    "brand": "Vapid",
+    "price": 18990,
+    "img": "img/Youga classic.webp"
+  },
+  {
+    "id": 23,
+    "name": "Contender Short",
+    "brand": "Vapid",
+    "price": 53999,
+    "img": "img/Contender Short.webp"
+  },
+  {
+    "id": 24,
+    "name": "Sandstorm",
+    "brand": "Vapid",
+    "price": 78450,
+    "img": "img/Sandstorm.webp"
+  },
+  {
+    "id": 25,
+    "name": "Slamvan Custum",
+    "brand": "Vapid",
+    "price": 35559,
+    "img": "img/Slamvan Custom.webp"
+  },
+  {
+    "id": 26,
+    "name": "Clown",
+    "brand": "Vapid",
+    "price": 28499,
+    "img": "img/Clown.webp"
+  },
+  {
+    "id": 27,
+    "name": "Trophy Truck",
+    "brand": "Vapid",
+    "price": 124850,
+    "img": "img/Trophy Truck.webp"
+  },
+  {
+    "id": 28,
+    "name": "Speedo",
+    "brand": "Vapid",
+    "price": 25595,
+    "img": "img/Speedo.webp"
+  },
+  {
+    "id": 29,
+    "name": "Sandking SWB",
+    "brand": "Vapid",
+    "price": 32450,
+    "img": "img/Sandking SWB.webp"
+  },
+  {
+    "id": 30,
+    "name": "Crowd Runner",
+    "brand": "Vapid",
+    "price": 126700,
+    "img": "img/Crowd Runner.webp"
+  },
+  {
+    "id": 31,
+    "name": "Contender",
+    "brand": "Vapid",
+    "price": 34700,
+    "img": "img/Contender.webp"
+  },
+  {
+    "id": 32,
+    "name": "Bobcat XL",
+    "brand": "Vapid",
+    "price": 17899,
+    "img": "img/Bobcat XL.webp"
+  },
+  {
+    "id": 33,
+    "name": "Youga 4x4",
+    "brand": "Vapid",
+    "price": 24990,
+    "img": "img/Youga 4x4.webp"
+  },
+  {
+    "id": 34,
+    "name": "Dessert Raid",
+    "brand": "Vapid",
+    "price": 129990,
+    "img": "img/Dessert Raid.webp"
+  },
+  {
+    "id": 35,
+    "name": "Sandking XL",
+    "brand": "Vapid",
+    "price": 38450,
+    "img": "img/Sandking XL.webp"
+  },
+  {
+    "id": 36,
+    "name": "Youga Custom",
+    "brand": "Vapid",
+    "price": 18990,
+    "img": "img/Youga Custom.webp"
+  },
+  {
+    "id": 37,
+    "name": "Riata",
+    "brand": "Vapid",
+    "price": 29995,
+    "img": "img/Riata.webp"
+  },
+  {
+    "id": 38,
+    "name": "Vader",
+    "brand": "Shitzu",
+    "price": 17990,
+    "img": "img/Vader.webp"
+  },
+  {
+    "id": 39,
+    "name": "Hakuchou Drag",
+    "brand": "Shitzu",
+    "price": 65590,
+    "img": "img/Hakuchou Drag.webp"
+  },
+  {
+    "id": 40,
+    "name": "Defliler",
+    "brand": "Shitzu",
+    "price": 12299,
+    "img": "img/Defiler.webp"
+  },
+  {
+    "id": 41,
+    "name": "Vortex",
+    "brand": "Pegassi",
+    "price": 28690,
+    "img": "img/Vortex.webp"
+  },
+  {
+    "id": 42,
+    "name": "Faggio Sport",
+    "brand": "Pegassi",
+    "price": 2199,
+    "img": "img/Faggio Sport.webp"
+  },
+  {
+    "id": 43,
+    "name": "Faggio Mod",
+    "brand": "Pegassi",
+    "price": 2999,
+    "img": "img/Faggio Mod.webp"
+  },
+  {
+    "id": 44,
+    "name": "Ruffian",
+    "brand": "Pegassi",
+    "price": 20899,
+    "img": "img/Ruffian.webp"
+  },
+  {
+    "id": 45,
+    "name": "FCR 1000 Custom",
+    "brand": "Pegassi",
+    "price": 42300,
+    "img": "img/FCR 1000 Custom.webp"
+  },
+  {
+    "id": 46,
+    "name": "Bati 801",
+    "brand": "Pegassi",
+    "price": 23500,
+    "img": "img/Bati 801.webp"
+  },
+  {
+    "id": 47,
+    "name": "Bati 901",
+    "brand": "Pegassi",
+    "price": 45000,
+    "img": "img/Bati 901.webp"
+  },
+  {
+    "id": 48,
+    "name": "Bati 801 RR",
+    "brand": "Pegassi",
+    "price": 26500,
+    "img": "img/Bati 801 RR.webp"
+  },
+  {
+    "id": 49,
+    "name": "Esskey",
+    "brand": "Pegassi",
+    "price": 10390,
+    "img": "img/Esskey.webp"
+  },
+  {
+    "id": 50,
+    "name": "FCR 1000",
+    "brand": "Pegassi",
+    "price": 28345,
+    "img": "img/FCR 1000.webp"
+  },
+  {
+    "id": 51,
+    "name": "Manchez",
+    "brand": "Maibatsu",
+    "price": 10250,
+    "img": "img/Manchez.webp"
+  },
+  {
+    "id": 52,
+    "name": "Manchez Scout C",
+    "brand": "Maibatsu",
+    "price": 13110,
+    "img": "img/Manchez Scout C.webp"
+  },
+  {
+    "id": 53,
+    "name": "Sanchez 2",
+    "brand": "Maibatsu",
+    "price": 15999,
+    "img": "img/Sanchez 2.webp"
+  },
+  {
+    "id": 54,
+    "name": "Manchez Scout",
+    "brand": "Maibatsu",
+    "price": 13110,
+    "img": "img/Manchez Scout.webp"
+  },
+  {
+    "id": 55,
+    "name": "Sanchez 1",
+    "brand": "Maibatsu",
+    "price": 14999,
+    "img": "img/Sanchez 1.webp"
+  },
+  {
+    "id": 56,
+    "name": "Rumpo",
+    "brand": "Bravado",
+    "price": 33595,
+    "img": "img/Rumpo.webp"
+  },
+  {
+    "id": 57,
+    "name": "Rat Truck",
+    "brand": "Bravado",
+    "price": 22000,
+    "img": "img/Rat Truck.webp"
+  },
+  {
+    "id": 58,
+    "name": "Youga",
+    "brand": "Bravado",
+    "price": 22390,
+    "img": "img/Youga.webp"
+  },
+  {
+    "id": 59,
+    "name": "Rumpo 2",
+    "brand": "Bravado",
+    "price": 33595,
+    "img": "img/Rumpo 2.webp"
+  },
+  {
+    "id": 60,
+    "name": "Versus",
+    "brand": "Dinka",
+    "price": 16295,
+    "img": "img/Versus.webp"
+  },
+  {
+    "id": 61,
+    "name": "Bodhi 2",
+    "brand": "Canis",
+    "price": 16599,
+    "img": "img/Bodhi 2.webp"
+  },
+  {
+    "id": 62,
+    "name": "Kamacho",
+    "brand": "Canis",
+    "price": 120580,
+    "img": "img/Kamacho.webp"
+  },
+  {
+    "id": 63,
+    "name": "BF 400",
+    "brand": "Nagasaki",
+    "price": 18899,
+    "img": "img/BF 400.webp"
+  },
+  {
+    "id": 64,
+    "name": "Carbon RS",
+    "brand": "Nagasaki",
+    "price": 24490,
+    "img": "img/Carbon RS.webp"
+  },
+  {
+    "id": 65,
+    "name": "Shotaro",
+    "brand": "Nagasaki",
+    "price": 358070,
+    "img": "img/Shotaro.webp"
+  },
+  {
+    "id": 66,
+    "name": "Shinobi",
+    "brand": "Nagasaki",
+    "price": 28675,
+    "img": "img/Shinobi.webp"
+  },
+  {
+    "id": 67,
+    "name": "Chimera",
+    "brand": "Nagasaki",
+    "price": 25389,
+    "img": "img/Chimera.webp"
+  },
+  {
+    "id": 68,
+    "name": "Enduro",
+    "brand": "Dinka",
+    "price": 4645,
+    "img": "img/Enduro.webp"
+  },
+  {
+    "id": 69,
+    "name": "Thruster",
+    "brand": "Dinka",
+    "price": 15790,
+    "img": "img/Thruster.webp"
+  },
+  {
+    "id": 70,
+    "name": "Vindicator",
+    "brand": "Dinka",
+    "price": 16890,
+    "img": "img/Vindicator.webp"
+  },
+  {
+    "id": 71,
+    "name": "Akuma",
+    "brand": "Dinka",
+    "price": 26595,
+    "img": "img/Akuma.webp"
+  },
+  {
+    "id": 72,
+    "name": "Double T",
+    "brand": "Dinka",
+    "price": 32500,
+    "img": "img/Double T.webp"
+  },
+  {
+    "id": 73,
+    "name": "Mule",
+    "brand": "Maibatsu",
+    "price": 69599,
+    "img": "img/Mule.webp"
+  },
+  {
+    "id": 74,
+    "name": "Mule 2",
+    "brand": "Maibatsu",
+    "price": 68799,
+    "img": "img/Mule 2.webp"
+  },
+  {
+    "id": 75,
+    "name": "Mule 5",
+    "brand": "Maibatsu",
+    "price": 68296,
+    "img": "img/Mule 5.webp"
+  },
+  {
+    "id": 76,
+    "name": "Krust",
+    "brand": "LCC",
+    "price": 47899,
+    "img": "img/Krust.webp"
+  },
+  {
+    "id": 77,
+    "name": "Avarus",
+    "brand": "LCC",
+    "price": 14900,
+    "img": "img/Avarus.webp"
+  },
+  {
+    "id": 78,
+    "name": "Sanctus",
+    "brand": "LCC",
+    "price": 27389,
+    "img": "img/Sanctus.webp"
+  },
+  {
+    "id": 79,
+    "name": "Rebel",
+    "brand": "Karin",
+    "price": 22899,
+    "img": "img/Rebel.webp"
+  },
+  {
+    "id": 80,
+    "name": "Rebel Rosti",
+    "brand": "Karin",
+    "price": 19589,
+    "img": "img/Rebel Rosti.webp"
+  },
+  {
+    "id": 81,
+    "name": "Everon",
+    "brand": "Karin",
+    "price": 54117,
+    "img": "img/Everon.webp"
+  },
+  {
+    "id": 82,
+    "name": "Diabolus Custom",
+    "brand": "Principe",
+    "price": 21295,
+    "img": "img/Diabolus Custom.webp"
+  },
+  {
+    "id": 83,
+    "name": "Diabolus",
+    "brand": "Principe",
+    "price": 18295,
+    "img": "img/Diabolus.webp"
+  },
+  {
+    "id": 84,
+    "name": "Nemesis",
+    "brand": "Principe",
+    "price": 15700,
+    "img": "img/Nemesis.webp"
+  },
+  {
+    "id": 85,
+    "name": "Lectro",
+    "brand": "Principe",
+    "price": 26595,
+    "img": "img/Lectro.webp"
+  },
+  {
+    "id": 86,
+    "name": "Dubstar 6x6",
+    "brand": "Benefactor",
+    "price": 268900,
+    "img": "img/Dubstar 6x6.webp"
+  },
+  {
+    "id": 87,
+    "name": "Inperial Van",
+    "brand": "Benefactor",
+    "price": 79580,
+    "img": "img/Imperial Van.webp"
+  },
+  {
+    "id": 88,
+    "name": "Inperial Transporter",
+    "brand": "Benefactor",
+    "price": 69580,
+    "img": "img/Imperial transporter.webp"
+  },
+  {
+    "id": 89,
+    "name": "Barracks Polar",
+    "brand": "HVY",
+    "price": 120000,
+    "img": "img/Barracks Polar.webp"
+  },
+  {
+    "id": 90,
+    "name": "Dune Reallytruck",
+    "brand": "MTL",
+    "price": 100000,
+    "img": "img/Dune Reallytruck.webp"
+  },
+  {
+    "id": 91,
+    "name": "Pounder",
+    "brand": "MTL",
+    "price": 256500,
+    "img": "img/Pounder.webp"
+  },
+  {
+    "id": 92,
+    "name": "Journey",
+    "brand": "Zirconium",
+    "price": 12800,
+    "img": "img/Journey.webp"
+  },
+  {
+    "id": 93,
+    "name": "Journey 2",
+    "brand": "Zirconium",
+    "price": 19389,
+    "img": "img/Journey 2.webp"
+  },
+  {
+    "id": 94,
+    "name": "Benson",
+    "brand": "Vapid",
+    "price": 169499,
+    "img": "img/Benson.webp"
+  }
+];
+
+let filteredCars = [...cars];
+
+function renderCars(list = filteredCars) {
+  const grid = document.getElementById("car-grid");
+  grid.innerHTML = "";
+  list.forEach(car => {
+    const card = document.createElement("div");
+    card.className = "car-card";
+    card.innerHTML = `
+      <img src="${car.img}" alt="${car.name}" onerror="this.src='img/placeholder.webp'; this.classList.add('img-missing');" />
+      <div class="info">
+        <div class="name">${car.name}</div>
+        <div class="brand">Marke: ${car.brand}</div>
+        <div class="price">Preis: €${Number(car.price).toLocaleString()}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function applyFilters() {
+  const nameFilter = document.getElementById("search-name").value.toLowerCase();
+  const brandFilter = document.getElementById("filter-brand").value.toLowerCase();
+  const minPrice = parseFloat(document.getElementById("filter-price-min").value);
+  const maxPrice = parseFloat(document.getElementById("filter-price-max").value);
+
+  filteredCars = cars.filter(car => {
+    let ok = true;
+    if (nameFilter && !car.name.toLowerCase().includes(nameFilter)) ok = false;
+    if (brandFilter && !car.brand.toLowerCase().includes(brandFilter)) ok = false;
+    if (!isNaN(minPrice) && Number(car.price) < minPrice) ok = false;
+    if (!isNaN(maxPrice) && Number(car.price) > maxPrice) ok = false;
+    return ok;
+  });
+
+  // Mehrfach-Sortierung: baue eine kombinierte Vergleichsfunktion aus allen aktivierten Checkboxen
+  const comparators = [];
+  if (document.getElementById("sort-brand-asc") && document.getElementById("sort-brand-asc").checked) {
+    comparators.push((a,b) => String(a.brand).localeCompare(String(b.brand)));
+  }
+  if (document.getElementById("sort-name-asc") && document.getElementById("sort-name-asc").checked) {
+    comparators.push((a,b) => String(a.name).localeCompare(String(b.name)));
+  }
+  if (document.getElementById("sort-price-asc") && document.getElementById("sort-price-asc").checked) {
+    comparators.push((a,b) => Number(a.price) - Number(b.price));
+  }
+  if (document.getElementById("sort-price-desc") && document.getElementById("sort-price-desc").checked) {
+    comparators.push((a,b) => Number(b.price) - Number(a.price));
+  }
+
+  if (comparators.length > 0) {
+    filteredCars.sort((a,b) => {
+      for (const cmp of comparators) {
+        const res = cmp(a,b);
+        if (res !== 0) return res;
+      }
+      return 0;
+    });
+  }
+
+  renderCars();
+  updateCounter();
+}
+
+// Init
+renderCars();
+
+function updateCounter() {
+  document.getElementById("results-counter").textContent = "Gefundene Fahrzeuge: " + filteredCars.length;
+}
+
+function resetFilters() {
+  document.getElementById("search-name").value = "";
+  document.getElementById("filter-brand").value = "";
+  document.getElementById("filter-price-min").value = "";
+  document.getElementById("filter-price-max").value = "";
+  document.getElementById("sort-options").value = "";
+  applyFilters();
+}
+</script>
+</body>
+</html>
